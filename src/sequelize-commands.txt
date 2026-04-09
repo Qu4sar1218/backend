@@ -1,0 +1,30 @@
+# link - https://sequelize.org/master/manual/migrations.html
+
+# copy
+
+.sequelizerc file
+
+# run these commands
+
+npx sequelize-cli init
+
+npx sequelize-cli model:generate --name Employees --attributes first_name:string,last_name:string,age:integer,address:string,role:string,department:string,position:string
+
+npx sequelize-cli db:migrate
+
+# copy
+
+
+#initilize data
+
+npx sequelize seed:generate --name employees-seeder
+
+npx sequelize db:seed:all
+
+#seed specific file
+
+npx sequelize db:seed --seed 20240214012345-demo-user.js
+
+
+# changes for env file only
+docker compose up -d --force-recreate

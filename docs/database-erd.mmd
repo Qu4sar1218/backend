@@ -1,0 +1,219 @@
+%% INTERACT — Sequelize schema (models in src/sequelize/models)
+%% Render in GitHub, Mermaid Live Editor, VS Code Mermaid preview, or `mmdc` (Mermaid CLI)
+
+erDiagram
+  %% ========== Organization & access ==========
+  roles ||--o{ users : "role_id"
+  schools ||--o{ users : "school_id"
+  schools ||--o{ timelog_devices : "school_id"
+  schools ||--o{ attendance_policies : "school_id"
+  departments ||--o{ timelog_devices : "department_id"
+  departments ||--o{ users : "teacher_department_id"
+
+  %% ========== Academic structure ==========
+  courses ||--o{ sections : "course_id"
+  courses ||--o{ student_enrollments : "course_id"
+  courses ||--o{ course_subjects : "course_id"
+  subjects ||--o{ course_subjects : "subject_id"
+  subjects ||--o{ teacher_subjects : "subject_id"
+  subjects ||--o{ section_subject_teachers : "subject_id"
+  subjects ||--o{ attendances : "subject_id"
+
+  users ||--o{ teacher_subjects : "teacher_id (teacher)"
+  users ||--o{ section_subject_teachers : "teacher_id (teacher)"
+  users ||--o{ attendances : "teacher_id (teacher)"
+
+  sections ||--o{ student_enrollments : "section_id"
+  sections ||--o{ section_subject_teachers : "section_id"
+  sections ||--o{ attendances : "section_id"
+
+  section_subject_teachers ||--o{ attendances : "section_subject_teacher_id"
+  section_subject_teachers ||--o{ attendance_policies : "section_subject_teacher_id"
+
+  %% ========== Students & enrollment ==========
+  users ||--o| students : "user_id (optional link)"
+  students ||--o{ student_credentials : "student_id"
+  students ||--o{ student_enrollments : "student_id"
+  students ||--o{ raw_timelogs : "student_id"
+  students ||--o{ payments : "student_id"
+  students ||--o{ attendances : "student_id"
+
+  %% ========== Events & payments ==========
+  events ||--o{ payments : "event_id"
+  events ||--o{ raw_timelogs : "event_id"
+
+  %% ========== Devices & time logs ==========
+  device_types ||--o{ timelog_devices : "device_type_id"
+  timelog_devices ||--o{ raw_timelogs : "device_id"
+  attendances ||--o{ raw_timelogs : "matched_attendance_id"
+
+  %% ----- Entity shapes: PK + main FKs / business keys (readable at a glance) -----
+  roles {
+    uuid id PK
+    string name
+    boolean active
+  }
+
+  schools {
+    uuid id PK
+    string school_code UK
+    string name
+    boolean status
+  }
+
+  departments {
+    uuid id PK
+    string code UK
+    string name
+    boolean active
+  }
+
+  users {
+    uuid id PK
+    uuid role_id FK
+    uuid school_id FK
+    uuid teacher_department_id FK "nullable"
+    string username
+    string email
+    boolean active
+  }
+
+  students {
+    uuid id PK
+    uuid user_id FK "nullable"
+    string student_id_number UK
+    string email
+    enum status
+    boolean active
+  }
+
+  student_credentials {
+    uuid id PK
+    uuid student_id FK
+    enum credential_type
+    boolean is_active
+  }
+
+  courses {
+    uuid id PK
+    string code UK
+    string name
+    enum year_level
+    boolean active
+  }
+
+  subjects {
+    uuid id PK
+    string code UK
+    string name
+    boolean active
+  }
+
+  course_subjects {
+    uuid id PK
+    uuid course_id FK
+    uuid subject_id FK
+    boolean active
+  }
+
+  teacher_subjects {
+    uuid id PK
+    uuid teacher_id FK
+    uuid subject_id FK
+    boolean active
+  }
+
+  sections {
+    uuid id PK
+    uuid course_id FK
+    string code UK
+    string name
+    enum year_level
+    boolean active
+  }
+
+  section_subject_teachers {
+    uuid id PK
+    uuid section_id FK
+    uuid subject_id FK
+    uuid teacher_id FK
+    time start_time
+    time end_time
+    json days_of_week
+    boolean active
+  }
+
+  student_enrollments {
+    uuid id PK
+    uuid student_id FK
+    uuid course_id FK
+    uuid section_id FK "nullable"
+    string school_year
+    enum status
+    boolean active
+  }
+
+  attendance_policies {
+    uuid id PK
+    uuid school_id FK
+    uuid section_subject_teacher_id FK "nullable"
+    int on_time_grace_minutes
+    int late_until_minutes
+    boolean active
+  }
+
+  attendances {
+    uuid id PK
+    uuid student_id FK
+    uuid section_subject_teacher_id FK
+    uuid section_id FK
+    uuid subject_id FK
+    uuid teacher_id FK
+    date attendance_date
+    enum status
+    enum source
+  }
+
+  events {
+    uuid id PK
+    string name
+    date event_date
+    time time_start
+    time time_end
+    boolean status
+  }
+
+  payments {
+    uuid id PK
+    uuid student_id FK
+    uuid event_id FK
+    decimal amount
+    enum status
+  }
+
+  device_types {
+    uuid id PK
+    string code UK
+    string name
+    boolean is_active
+  }
+
+  timelog_devices {
+    uuid id PK
+    uuid school_id FK
+    uuid device_type_id FK
+    uuid department_id FK "nullable"
+    string code UK
+    enum status
+  }
+
+  raw_timelogs {
+    uuid id PK
+    uuid device_id FK "nullable"
+    uuid student_id FK "nullable"
+    uuid event_id FK "nullable"
+    uuid matched_attendance_id FK "nullable"
+    datetime log_datetime
+    enum source_type
+    enum processing_status
+  }
