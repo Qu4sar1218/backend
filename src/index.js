@@ -1,66 +1,66 @@
-const express = require('express');
-const dotenv = require('dotenv');
-const cors = require('cors');
-const path = require('path');
-const routes = require('./routes');
-const { verifySmtpConnection } = require('./services/email.service');
+// server.js
+require("dotenv").config();
+const express = require("express");
+const cors = require("cors");
+const path = require("path");
+const routes = require("./routes"); // your API routes
+const { verifySmtpConnection } = require("./services/email.service");
 
-// Load environment variables
-dotenv.config();
-
-// Initialize express app
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3030;
 
+// ----------------------
 // CORS Configuration
-const allowedOrigins = process.env.ALLOWED_ORIGINS 
-  ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim()) 
+// ----------------------
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",").map((o) => o.trim())
   : [];
 
-if (allowedOrigins.length === 0) {
-  console.warn('Warning: No ALLOWED_ORIGINS specified in environment variables');
-}
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (Postman, curl, mobile apps)
+      if (!origin) return callback(null, true);
 
-const corsOptions = {
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps, curl, postman)
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-};
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`Origin ${origin} not allowed by CORS`));
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+  }),
+);
 
+// Handle preflight requests for all routes
+app.options("*", cors());
+
+// ----------------------
 // Middleware
-app.use(cors(corsOptions));
+// ----------------------
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Static files configuration
-app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
-  setHeaders: (res, filePath) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-    
-    if (filePath.endsWith('.mp4')) {
-      res.setHeader('Content-Type', 'video/mp4');
-    }
-  }
-}));
+// Serve static files (uploads)
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "../uploads"), {
+    setHeaders: (res, filePath) => {
+      res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+      if (filePath.endsWith(".mp4")) res.setHeader("Content-Type", "video/mp4");
+    },
+  }),
+);
 
+// ----------------------
 // API Routes
 app.use('/api', routes);
 
 // 404 Handler - Should be after all routes
 app.use((req, res) => {
-  res.status(404).json({
-    status: 404,
-    message: 'Resource not found'
-  });
+  res.status(404).json({ status: 404, message: "Resource not found" });
 });
 
 // Error Handler
@@ -86,12 +86,13 @@ const startServer = async () => {
   }
 };
 
-startServer();
 
 // Handle unhandled rejections
 process.on('unhandledRejection', (err) => {
   console.error('Unhandled Rejection:', err);
   process.exit(1);
 });
+
+startServer();
 
 module.exports = app;
