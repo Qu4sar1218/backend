@@ -24,16 +24,19 @@ function getTransporter() {
     return null;
   }
 
-transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  family: 4,
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
+  transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.GOOGLE_APP_PASS,
+    },
+    family: 4, // 🔥 THIS FIXES Render IPv6 timeout issues
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
   socketTimeout: 15000,
-  auth: { user, pass }
-});
+  });
 
   return transporter;
 }
