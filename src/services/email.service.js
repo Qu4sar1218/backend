@@ -5,7 +5,7 @@ const { Resend } = require('resend');
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 function getFrom() {
-  return process.env.EMAIL_FROM || 'InterACTS <noreply@resend.dev>';
+  return process.env.EMAIL_FROM || "InterACTS <noreply@backend-4i8r.onrender.com>";
 }
 
 /**
