@@ -28,15 +28,20 @@ function getTransporter() {
     host: "smtp.gmail.com",
     port: 587,
     secure: false,
+
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.GOOGLE_APP_PASS,
     },
-    family: 4, // 🔥 THIS FIXES Render IPv6 timeout issues
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
+
+    family: 4,
+    dnsLookup: (hostname, options, callback) => {
+      require("dns").lookup(hostname, { family: 4 }, callback);
+  },
+
+  connectionTimeout: 15000,
   socketTimeout: 15000,
-  });
+});
 
   return transporter;
 }
