@@ -4,6 +4,9 @@ const nodemailer = require('nodemailer');
 
 let transporter = null;
 let verifyPromise = null;
+const dns = require("dns");
+dns.setDefaultResultOrder("ipv4first");
+
 
 function getAppPassword() {
   const raw = process.env.GOOGLE_APP_PASS || '';
@@ -22,7 +25,9 @@ function getTransporter() {
   }
 
   transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false, 
     auth: {
       user,
       pass

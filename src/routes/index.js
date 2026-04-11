@@ -20,8 +20,10 @@ const paymentRoutes = require('./payment/payment-route');
 const attendancePolicyRoutes = require('./attendance-policy/attendance-policy-route');
 const reportsRoutes = require('./reports/reports-route');
 const emailLogRoutes = require('./email-log/email-log-route');
-
 const router = express.Router();
+
+const testEmailRoute = require('./email/test-email-route');
+
 
 // Mount the routes
 router.use('/auth', authRoutes);
@@ -45,5 +47,7 @@ router.use('/payments', paymentRoutes);
 router.use('/attendance-policies', attendancePolicyRoutes);
 router.use('/reports', reportsRoutes);
 router.use('/email-logs', emailLogRoutes);
+router.use('/emails', testEmailRoute);
+
 
 module.exports = router; 
