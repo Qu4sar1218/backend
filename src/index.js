@@ -4,7 +4,7 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const routes = require("./routes"); // your API routes
-const { verifyEmailConnection } = require("./services/email.service");
+const { verifySmtpConnection } = require("./services/email.service");
 
 const app = express();
 const PORT = process.env.PORT || 3030;
@@ -78,7 +78,7 @@ const startServer = async () => {
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
       console.log(`📚 API Documentation: http://localhost:${PORT}/api/docs`);
-      verifyEmailConnection();
+      verifySmtpConnection();
     });
   } catch (error) {
     console.error('Failed to start server:', error);
